@@ -14,16 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ads: {
+        Row: {
+          category_id: string
+          city_id: string
+          created_at: string
+          description: string
+          featured_until: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          is_featured: boolean
+          price: number
+          title: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          category_id: string
+          city_id: string
+          created_at?: string
+          description: string
+          featured_until?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_featured?: boolean
+          price: number
+          title: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          category_id?: string
+          city_id?: string
+          created_at?: string
+          description?: string
+          featured_until?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_featured?: boolean
+          price?: number
+          title?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ads_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cities: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          ad_id: string
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          notes: string | null
+          proof_url: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ad_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          method: string
+          notes?: string | null
+          proof_url: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ad_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          notes?: string | null
+          proof_url?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          free_post_enabled: boolean
+          id: number
+          payment_phone: string
+          pro_price: number
+          updated_at: string
+        }
+        Insert: {
+          free_post_enabled?: boolean
+          id?: number
+          payment_phone?: string
+          pro_price?: number
+          updated_at?: string
+        }
+        Update: {
+          free_post_enabled?: boolean
+          id?: number
+          payment_phone?: string
+          pro_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +343,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
