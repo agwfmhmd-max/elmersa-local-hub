@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Star, StarOff, Trash2, CheckCircle2, XCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Star, StarOff, Trash2, CheckCircle2, XCircle, Eye, EyeOff, ZoomIn, ExternalLink, Download } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة المشرف - المرصة" }] }),
