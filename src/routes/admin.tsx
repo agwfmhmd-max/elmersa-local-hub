@@ -22,6 +22,23 @@ function AdminPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  // Extracts the storage object path from a stored URL (signed or public) so we can refresh it.
+  const extractProofPath = (url: string): string | null => {
+    if (!url) return null;
+    if (!url.startsWith("http")) return url; // already a path
+    const m = url.match(/\/payment-proofs\/([^?]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  };
+
+  const openProof = async (url: string) => {
+    const path = extractProofPath(url);
+    if (!path) { setProofPreview(url); return; }
+    const { data, error } = await supabase.storage.from("payment-proofs").createSignedUrl(path, 60 * 60);
+    if (error || !data) { toast.error("تعذّر فتح صورة الإثبات"); return; }
+    setProofPreview(data.signedUrl);
+  };
 
   const reload = async () => {
     const [{ data: a }, { data: p }, { data: s }] = await Promise.all([
