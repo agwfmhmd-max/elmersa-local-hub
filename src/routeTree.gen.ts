@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpgradeRouteImport } from './routes/upgrade'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PostAdRouteImport } from './routes/post-ad'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,11 +18,6 @@ import { Route as AdAdIdRouteImport } from './routes/ad.$adId'
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
   path: '/upgrade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostAdRoute = PostAdRouteImport.update({
@@ -51,7 +45,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-ad': typeof PostAdRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upgrade': typeof UpgradeRoute
   '/ad/$adId': typeof AdAdIdRoute
 }
@@ -59,7 +52,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-ad': typeof PostAdRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upgrade': typeof UpgradeRoute
   '/ad/$adId': typeof AdAdIdRoute
 }
@@ -68,36 +60,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-ad': typeof PostAdRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upgrade': typeof UpgradeRoute
   '/ad/$adId': typeof AdAdIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/admin'
-    | '/post-ad'
-    | '/sitemap.xml'
-    | '/upgrade'
-    | '/ad/$adId'
+  fullPaths: '/' | '/admin' | '/post-ad' | '/upgrade' | '/ad/$adId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/post-ad' | '/sitemap.xml' | '/upgrade' | '/ad/$adId'
-  id:
-    | '__root__'
-    | '/'
-    | '/admin'
-    | '/post-ad'
-    | '/sitemap.xml'
-    | '/upgrade'
-    | '/ad/$adId'
+  to: '/' | '/admin' | '/post-ad' | '/upgrade' | '/ad/$adId'
+  id: '__root__' | '/' | '/admin' | '/post-ad' | '/upgrade' | '/ad/$adId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   PostAdRoute: typeof PostAdRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UpgradeRoute: typeof UpgradeRoute
   AdAdIdRoute: typeof AdAdIdRoute
 }
@@ -109,13 +86,6 @@ declare module '@tanstack/react-router' {
       path: '/upgrade'
       fullPath: '/upgrade'
       preLoaderRoute: typeof UpgradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/post-ad': {
@@ -153,7 +123,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   PostAdRoute: PostAdRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UpgradeRoute: UpgradeRoute,
   AdAdIdRoute: AdAdIdRoute,
 }
