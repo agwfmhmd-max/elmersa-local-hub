@@ -223,6 +223,27 @@ function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!proofPreview} onOpenChange={(o) => !o && setProofPreview(null)}>
+        <DialogContent className="max-w-4xl p-2 sm:p-4">
+          <DialogTitle className="sr-only">إثبات الدفع</DialogTitle>
+          {proofPreview && (
+            <div className="space-y-3">
+              <div className="max-h-[80vh] overflow-auto rounded-md bg-muted">
+                <img src={proofPreview} alt="إثبات الدفع بحجم كامل" className="mx-auto block max-w-full" />
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <a href={proofPreview} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm"><ExternalLink className="size-4" /> فتح في تبويب جديد</Button>
+                </a>
+                <a href={proofPreview} download>
+                  <Button variant="outline" size="sm"><Download className="size-4" /> تحميل</Button>
+                </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
