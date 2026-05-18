@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Star, StarOff, Trash2, CheckCircle2, XCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Star, StarOff, Trash2, CheckCircle2, XCircle, Eye, EyeOff, ZoomIn, ExternalLink, Download } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "لوحة المشرف - المرصة" }] }),
@@ -21,6 +22,23 @@ function AdminPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  // Extracts the storage object path from a stored URL (signed or public) so we can refresh it.
+  const extractProofPath = (url: string): string | null => {
+    if (!url) return null;
+    if (!url.startsWith("http")) return url; // already a path
+    const m = url.match(/\/payment-proofs\/([^?]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  };
+
+  const openProof = async (url: string) => {
+    const path = extractProofPath(url);
+    if (!path) { setProofPreview(url); return; }
+    const { data, error } = await supabase.storage.from("payment-proofs").createSignedUrl(path, 60 * 60);
+    if (error || !data) { toast.error("تعذّر فتح صورة الإثبات"); return; }
+    setProofPreview(data.signedUrl);
+  };
 
   const reload = async () => {
     const [{ data: a }, { data: p }, { data: s }] = await Promise.all([
@@ -130,13 +148,21 @@ function AdminPage() {
         <TabsContent value="payments" className="mt-4 space-y-2">
           {payments.length === 0 && <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">لا توجد مدفوعات</div>}
           {payments.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 shadow-sm">
-              <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="size-16 shrink-0 overflow-hidden rounded-md bg-muted">
-                <img src={p.proof_url} alt="إثبات" className="size-full object-cover" />
-              </a>
+            <div key={p.id} className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-start">
+              <button
+                type="button"
+                onClick={() => openProof(p.proof_url)}
+                className="group relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-44"
+                aria-label="عرض إثبات الدفع"
+              >
+                <img src={p.proof_url} alt="إثبات الدفع" className="size-full object-contain" loading="lazy" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/40">
+                  <ZoomIn className="size-6 text-white opacity-0 transition group-hover:opacity-100" />
+                </div>
+              </button>
               <div className="flex-1 min-w-0">
                 <div className="truncate font-semibold">{p.ad?.title || p.ad_id}</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="mt-1 text-sm text-muted-foreground">
                   {Number(p.amount).toLocaleString("ar-MR")} MRU · {p.method} ·{" "}
                   <span className={
                     p.status === "approved" ? "text-success" : p.status === "rejected" ? "text-destructive" : "text-warning"
@@ -144,18 +170,23 @@ function AdminPage() {
                     {p.status === "approved" ? "مقبول" : p.status === "rejected" ? "مرفوض" : "قيد المراجعة"}
                   </span>
                 </div>
-                {p.notes && <div className="text-xs text-muted-foreground">ملاحظة: {p.notes}</div>}
-              </div>
-              {p.status === "pending" && (
-                <div className="flex gap-2">
-                  <Button size="sm" className="bg-success text-success-foreground hover:bg-success/90" onClick={() => approvePayment(p)}>
-                    <CheckCircle2 className="size-4" /> موافقة
+                {p.notes && <div className="mt-1 text-xs text-muted-foreground">ملاحظة: {p.notes}</div>}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => openProof(p.proof_url)}>
+                    <ZoomIn className="size-4" /> تكبير الصورة
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => rejectPayment(p)}>
-                    <XCircle className="size-4" /> رفض
-                  </Button>
+                  {p.status === "pending" && (
+                    <>
+                      <Button size="sm" className="bg-success text-success-foreground hover:bg-success/90" onClick={() => approvePayment(p)}>
+                        <CheckCircle2 className="size-4" /> موافقة
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => rejectPayment(p)}>
+                        <XCircle className="size-4" /> رفض
+                      </Button>
+                    </>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </TabsContent>
@@ -192,6 +223,27 @@ function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!proofPreview} onOpenChange={(o) => !o && setProofPreview(null)}>
+        <DialogContent className="max-w-4xl p-2 sm:p-4">
+          <DialogTitle className="sr-only">إثبات الدفع</DialogTitle>
+          {proofPreview && (
+            <div className="space-y-3">
+              <div className="max-h-[80vh] overflow-auto rounded-md bg-muted">
+                <img src={proofPreview} alt="إثبات الدفع بحجم كامل" className="mx-auto block max-w-full" />
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <a href={proofPreview} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm"><ExternalLink className="size-4" /> فتح في تبويب جديد</Button>
+                </a>
+                <a href={proofPreview} download>
+                  <Button variant="outline" size="sm"><Download className="size-4" /> تحميل</Button>
+                </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
